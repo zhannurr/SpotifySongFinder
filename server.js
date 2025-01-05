@@ -33,19 +33,38 @@ app.post('/search', async (req, res) => {
             name: track.name,
             artist: track.artists.map(artist => artist.name).join(', '),
             album: track.album.name,
-            link: track.external_urls.spotify
+            link: track.external_urls.spotify,
+            image: track.album.images[0]?.url || ''  // Get album cover image
         }));
+        
 
-        let resultHtml = '<h1>Search Results:</h1>';
-        results.forEach(song => {
-            resultHtml += `
-                <p><strong>${song.name}</strong> - ${song.artist} (Album: ${song.album})</p>
+        let resultHtml = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Spotify Search Results</title>
+            <link rel="stylesheet" href="/style.css">
+        </head>
+        <body>
+            <h1>Search Results:</h1>
+            <div class="results-container">
+    `;
+    
+    results.forEach(song => {
+        resultHtml += `
+            <div class="track">
+                <img src="${song.image}" alt="Album Cover">
+                <p><strong>${song.name}</strong> - ${song.artist}</p>
+                <p><em>Album: ${song.album}</em></p>
                 <a href="${song.link}" target="_blank">Listen on Spotify</a>
-                <hr>
-            `;
-        });
-
-        res.send(resultHtml);
+            </div>
+        `;
+    });
+    
+    resultHtml += `</div></body></html>`;
+    res.send(resultHtml);
     } catch (error) {
         res.status(500).send('Error searching for the song');
     }
